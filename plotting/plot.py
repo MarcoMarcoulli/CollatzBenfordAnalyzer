@@ -8,7 +8,7 @@ from typing import Any
 import matplotlib
 from matplotlib.figure import Figure
 
-from collatz_math import expected_benford, leading_digit_frequencies
+from core.collatz_math import expected_benford, leading_digit_frequencies
 
 
 # ------------------------ THEME ------------------------

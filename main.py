@@ -1,6 +1,6 @@
 # main.py
 import ttkbootstrap as tb
-from gui import CollatzGui
+from gui.controller import CollatzGui
 
 """
 Application entry point.

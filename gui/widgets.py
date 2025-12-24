@@ -1,7 +1,6 @@
 # gui/widgets.py
 import tkinter as tk
 
-
 def _rounded_rect_points(x1: int, y1: int, x2: int, y2: int, r: int) -> list[int]:
     """
     Return a list of points suitable for a smooth polygon approximating
@@ -224,3 +223,7 @@ class RoundedButton(tk.Canvas):
             font=self._font,
             tags="btn",
         )
+        
+    def set_text(self, text: str) -> None:
+        self._text = text
+        self._redraw()

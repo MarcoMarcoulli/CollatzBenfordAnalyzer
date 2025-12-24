@@ -6,7 +6,7 @@ from typing import Optional, Sequence, Any
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-from plot import (
+from plotting.plot import (
     PlotTheme as PlotPyTheme,
     DEFAULT_THEME,
     add_orbit as plot_add_orbit,
