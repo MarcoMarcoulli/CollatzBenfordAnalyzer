@@ -10,7 +10,7 @@ from plotting.plot import reset_plot_state
 from gui.layout import configure_root, build_layout, apply_plot_layout_for_mode, UiRefs
 from gui.plot_surface import PlotSurface, PlotTheme
 from gui.state import Mode, EvolutionState
-from gui.theme import CARD_BG, PLOT_TITLE, PLOT_TICKS, PLOT_SPINE, PLOT_GRID
+from gui.theme import CARD_BG, PLOT_TITLE, PLOT_TICKS, PLOT_SPINE, PLOT_GRID, BTN_PAUSE_BG, BTN_PAUSE_HOVER, BTN_RESUME_BG, BTN_RESUME_HOVER
 from gui import actions
 
 
@@ -62,8 +62,10 @@ class CollatzGui:
         self.mode = mode
 
         if mode == Mode.IDLE:
-            self.ui.mode_label.config(text="Choose a mode:")
-            self.ui.help_label.config(text="Enter a value and pick an action.")
+            self.ui.mode_label.config(text="Insert a positive integer:")
+
+            self.ui.entry_main.delete(0, "end")   
+            self.ui.entry_main.focus_set() 
 
             # show actions
             self.ui.btn_single.pack(fill="x", pady=(0, 10))
@@ -79,20 +81,21 @@ class CollatzGui:
 
         if mode == Mode.SINGLE:
             self.ui.mode_label.config(text="Mode: Single Orbit")
-            self.ui.help_label.config(text="Enter N and press Enter (or Reset to change mode).")
             self.ui.btn_stop.pack_forget()
 
         elif mode == Mode.CUMULATIVE:
-            self.ui.mode_label.config(text="Mode: Cumulative Orbits (1..MaxN)")
-            self.ui.help_label.config(text="Enter Max N and start. Pause is available during evolution.")
+            self.ui.mode_label.config(text="Mode: Benford Analysis")
 
             self.ui.btn_stop.set_text("PAUSE")
             self.ui.btn_stop.pack(fill="x", pady=(0, 10))
+            self.ui.btn_stop.set_background(
+                bg=BTN_PAUSE_BG,
+                bg_hover=BTN_PAUSE_HOVER,
+            )
             self.ui.btn_stop.configure_state("disabled")
 
         elif mode == Mode.TREE:
-            self.ui.mode_label.config(text="Mode: Collatz Tree")
-            self.ui.help_label.config(text="Enter a parameter (e.g., depth) and run. (TODO)")
+            self.ui.mode_label.config(text="Mode: Collatz inverse Tree")
             self.ui.btn_stop.pack_forget()
 
         # hide actions
@@ -130,9 +133,17 @@ class CollatzGui:
 
         if self.evo.is_paused:
             self.ui.btn_stop.set_text("RESUME")
+            self.ui.btn_stop.set_background(
+                bg=BTN_RESUME_BG,
+                bg_hover=BTN_RESUME_HOVER,
+            )
         else:
             self.ui.btn_stop.set_text("PAUSE")
-            actions.evolve_step(self)  # kick once to resume
+            self.ui.btn_stop.set_background(
+                bg=BTN_PAUSE_BG,
+                bg_hover=BTN_PAUSE_HOVER,
+            )
+            actions.evolve_step(self)  
 
     # ------------------------ RESET ------------------------
 

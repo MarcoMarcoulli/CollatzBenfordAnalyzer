@@ -133,7 +133,7 @@ class RoundedButton(tk.Canvas):
         bg: str,
         fg: str = "white",
         bg_hover: str | None = None,
-        bg_disabled: str = "#475569",
+        bg_disabled: str = "#F8F8F8",
         radius: int = 14,
         font=("Segoe UI", 10, "bold"),
         height: int = 40,
@@ -227,3 +227,12 @@ class RoundedButton(tk.Canvas):
     def set_text(self, text: str) -> None:
         self._text = text
         self._redraw()
+
+    def set_background(self, bg: str, bg_hover: str | None = None) -> None:
+        self._bg = bg
+        if bg_hover is not None:
+            self._bg_hover = bg_hover
+        else:
+            self._bg_hover = bg
+        self._redraw()
+

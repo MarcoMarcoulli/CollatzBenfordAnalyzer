@@ -1,7 +1,8 @@
 import math
-from collections import Counter
-from typing import Iterable
-
+from collections import Counter, deque, defaultdict
+from typing import Iterable, Deque, Dict, List, Optional, Tuple
+from enum import Enum
+from dataclasses import dataclass
 
 def collatz_step(n: int) -> int:
     """
@@ -166,3 +167,191 @@ def expected_benford() -> tuple[list[int], list[float]]:
     digits = list(range(1, 10))
     probs = [math.log10(1 + 1 / d) for d in digits]
     return digits, probs
+
+
+class EdgeType(str, Enum):
+    EVEN = "DOUBLE"  # child = 2 * parent
+    ODD = "ODD"  # child = (parent - 1) / 3 
+
+@dataclass(frozen=True)
+class Node:
+    id: int
+    value: int
+    parent_id: Optional[int]
+    depth: int
+    parent_edge_type: Optional[EdgeType]  # None for root
+
+def generate_inverse_collatz_tree(
+    target: int,
+    *,
+    max_nodes: Optional[int] = 200_000,
+) -> List[Node]:
+    """
+    Generate the inverse Collatz tree rooted at 1 using BFS until `target` appears.
+
+    This variant:
+      - does NOT use visited/deduplication
+      - manually seeds the deterministic initial chain 1 -> 2 -> 4 -> 8 -> 16
+      - starts the BFS expansion from node 16
+
+    Notes:
+      - Children here are "inverse predecessors" of a node m:
+          - always: 2*m
+          - sometimes: (m-1)/3 if m % 6 == 4
+    """
+    if target <= 0:
+        raise ValueError("target must be a positive integer")
+
+    nodes: List[Node] = []
+    q: Deque[int] = deque()
+
+    def add_node(
+        value: int,
+        parent_id: Optional[int],
+        depth: int,
+        edge_type: Optional[EdgeType],
+        enqueue: bool = True,
+    ) -> int:
+        node_id = len(nodes)
+        nodes.append(Node(node_id, value, parent_id, depth, edge_type))
+        if enqueue:
+            q.append(node_id)
+        return node_id
+
+    # ---- Seed fixed initial chain: 1 -> 2 -> 4 -> 8 -> 16 ----
+    # root
+    id_1 = add_node(1, None, 0, None, enqueue=False)
+    if target == 1:
+        return nodes
+
+    id_2 = add_node(2, id_1, 1, EdgeType.EVEN, enqueue=False)
+    if target == 2:
+        return nodes
+
+    id_4 = add_node(4, id_2, 2, EdgeType.EVEN, enqueue=False)
+    if target == 4:
+        return nodes
+
+    id_8 = add_node(8, id_4, 3, EdgeType.EVEN, enqueue=False)
+    if target == 8:
+        return nodes
+
+    id_16 = add_node(16, id_8, 4, EdgeType.EVEN, enqueue=True)  # start BFS from here
+    if target == 16:
+        return nodes
+
+    # ---- BFS expansion starting from 16 ----
+    while q:
+        if max_nodes is not None and len(nodes) >= max_nodes:
+            break
+
+        u_id = q.popleft()
+        u = nodes[u_id]
+        next_depth = u.depth + 1
+
+        # Child 1: 2*u (always)
+        c1_val = 2 * u.value
+        c1_id = add_node(c1_val, u_id, next_depth, EdgeType.EVEN, enqueue=True)
+        if c1_val == target:
+            break
+
+        # Child 2: (u-1)/3 only if u % 6 == 4 (ensures integer and odd)
+        if u.value % 6 == 4:
+            c2_val = (u.value - 1) // 3
+            add_node(c2_val, u_id, next_depth, EdgeType.ODD, enqueue=True)
+            if c2_val == target:
+                break
+
+    return nodes
+
+
+def map_top_down_tree(
+    nodes: List[Node],
+    *,
+    x_spacing: float = 1.0,
+    y_spacing: float = 1.0,
+) -> Dict[int, Tuple[float, float]]:
+    """
+    Return coordinates for a classic top-down tree layout.
+
+    - y = depth * y_spacing
+    - x is assigned by a post-order traversal:
+        * leaves get consecutive x slots
+        * internal nodes are centered above their children (average of children's x)
+
+    Works even if nodes contain duplicates in value (we layout by node_id).
+    """
+
+    if not nodes:
+        return {}
+
+    # 1) children lists
+    children: Dict[int, List[int]] = defaultdict(list)
+    root_id: Optional[int] = None
+
+    for n in nodes:
+        if n.parent_id is None:
+            root_id = n.id
+        else:
+            children[n.parent_id].append(n.id)
+
+    if root_id is None:
+        # Fallback: assume 0 is root if missing parent_id None
+        root_id = 0
+
+    # 2) stable ordering for nicer drawings:
+    #    - put DOUBLE child first (usually the "main chain"),
+    #    - then ODD_PREIMAGE
+    #    - then by value to keep it deterministic
+    def child_sort_key(child_id: int):
+        c = nodes[child_id]
+        # parent_edge_type is the type of edge from parent -> child
+        # We want DOUBLE first
+        edge_rank = 0
+        if c.parent_edge_type is not None:
+            edge_rank = 0 if c.parent_edge_type.name.startswith("EVEN") else 1
+        return (edge_rank, c.value, c.id)
+
+    for pid, lst in children.items():
+        lst.sort(key=child_sort_key)
+
+    # 3) post-order assignment of x
+    x_coord: Dict[int, float] = {}
+    y_coord: Dict[int, float] = {}
+    visited: set[int] = set()
+    next_x = 0.0
+
+    def dfs(u_id: int) -> None:
+        nonlocal next_x
+
+        if u_id in visited:
+            return
+        visited.add(u_id)
+
+        # visit children first
+        for v_id in children.get(u_id, []):
+            dfs(v_id)
+
+        # assign y always from depth
+        y_coord[u_id] = nodes[u_id].depth * y_spacing
+
+        # assign x
+        kids = children.get(u_id, [])
+        if not kids:
+            # leaf
+            x_coord[u_id] = next_x
+            next_x += x_spacing
+        else:
+            # center above children
+            xs = [x_coord[k] for k in kids]
+            x_coord[u_id] = sum(xs) / len(xs)
+
+    dfs(root_id)
+
+    # In case the structure is forest-like (shouldn't, but with truncations / bugs it can),
+    # lay out any unreachable nodes after the main component.
+    for n in nodes:
+        if n.id not in visited:
+            dfs(n.id)
+
+    return {nid: (x_coord[nid], y_coord[nid]) for nid in x_coord.keys()}

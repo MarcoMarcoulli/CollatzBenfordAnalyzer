@@ -10,7 +10,6 @@ from matplotlib.figure import Figure
 
 from core.collatz_math import expected_benford, leading_digit_frequencies
 
-
 # ------------------------ THEME ------------------------
 
 @dataclass(frozen=True)

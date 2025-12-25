@@ -65,6 +65,7 @@ def start_cumulative(controller: "CollatzGui") -> None:
 
     controller.ui.btn_stop.set_text("PAUSE")
     controller.ui.btn_stop.configure_state("normal")
+    controller.ui.btn_stop.pack(fill="x", pady=(0, 10))
     evolve_step(controller)
 
 
@@ -77,7 +78,8 @@ def evolve_step(controller: "CollatzGui") -> None:
 
     if controller.evo.current_n > controller.evo.max_n:
         controller.evo.is_evolving = False
-        controller.ui.btn_stop.configure_state("disabled")
+        controller.evo.is_paused = False
+        controller.ui.btn_stop.pack_forget()
         return
 
     orbit = collatz_orbit(controller.evo.current_n)

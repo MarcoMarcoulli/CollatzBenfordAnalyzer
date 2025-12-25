@@ -9,20 +9,16 @@ without touching layout logic.
 # ------------------------ COLORS ------------------------
 
 # Sidebar
-SIDEBAR_BG = "#0f172a"
-SIDEBAR_TEXT = "#ffffff"
+SIDEBAR_BG = "#dee1e7"
+SIDEBAR_TEXT = "#020202"
 SIDEBAR_MUTED = "#a9b4c6"
 
 # Main content area
-CONTENT_BG = "#f2f5fb"
+CONTENT_BG = "#ffffff"
 
 # Cards (plots)
-CARD_BG = "#0b1220"
-CARD_SHADOW = "#0a0f1c"
-
-# Inputs
-ENTRY_TEXT = "#0f172a"
-ENTRY_PLACEHOLDER = "#64748b"
+CARD_BG = "#465e8f"
+CARD_SHADOW = "#2a3245"
 
 # Plot styling (dark)
 PLOT_TICKS = "#cbd5e1"
@@ -32,20 +28,18 @@ PLOT_GRID = "#1f2a44"
 
 # Buttons
 BTN_TEXT = "#ffffff"
-BTN_DISABLED_BG = "#475569"
+BTN_RESET_BG = "#475569"
+BTN_RESET_HOVER = "#323C4A"
 BTN_DISABLED_TEXT = "#e2e8f0"
 
-BTN_PRIMARY_BG = "#3b82f6"
-BTN_PRIMARY_HOVER = "#2563eb"
+BTN_SELECTION_BG = "#2563eb"
+BTN_SELECTION_HOVER = "#163c90"
 
-BTN_SECONDARY_BG = "#334155"
-BTN_SECONDARY_HOVER = "#1f2937"
+BTN_RESUME_BG = "#22c55e"
+BTN_RESUME_HOVER = "#16a34a"
 
-BTN_SUCCESS_BG = "#22c55e"
-BTN_SUCCESS_HOVER = "#16a34a"
-
-BTN_DANGER_BG = "#ef4444"
-BTN_DANGER_HOVER = "#dc2626"
+BTN_PAUSE_BG = "#ef4444"
+BTN_PAUSE_HOVER = "#dc2626"
 
 
 # ------------------------ SIZING / SPACING ------------------------
@@ -63,7 +57,6 @@ CONTENT_PADY = 18
 
 SIDEBAR_PADX = 22
 TITLE_PADY = (18, 8)
-SUBTITLE_PADY = (0, 14)
 
 SECTION_GAP = 18
 

@@ -12,7 +12,7 @@ This module is responsible only for:
 """
 if __name__ == "__main__":
     # Create the ttkbootstrap root window
-    root = tb.Window(themename="darkly")
+    root = tb.Window(themename="flatly")
 
     # Instantiate the main GUI controller
     CollatzGui(root)
